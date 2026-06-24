@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Service 1: The PostgreSQL Database and Checkpointer Engine
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: sentinel_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abcd
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Automatically executes your schema script to seed tables on initial build
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - sentinel_network
+
+  # Service 2: The Streamlit Graphical AI Agent Dashboard
+  web_app:
+    build: .
+    container_name: sentinel_web_ui
+    restart: always
+    ports:
+      - "8501:8501"
+    environment:
+      - DATABASE_URL=postgresql://postgres:abcd@postgres_db:5432/postgres
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    depends_on:
+      - postgres_db
+    networks:
+      - sentinel_network
+
+volumes:
+  postgres_data:
+
+networks:
+  sentinel_network:
+    driver: bridge
