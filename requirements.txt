@@ -1,0 +1,7 @@
+streamlit
+langchain-core
+langchain-google-genai
+langgraph
+psycopg
+psycopg-pool
+python-dotenv
